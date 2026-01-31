@@ -1,0 +1,2 @@
+# Projeto2-IaC-para-Treinamento-Distribuido-de-ML-com-PySpark-AWS-EMR
+O Projeto 2 foca na implementação e no deploy de um stack avançado de treinamento distribuído de Machine Learning utilizando PySpark no Amazon Elastic MapReduce (EMR). O objetivo é aproveitar o processamento distribuído para treinar modelos de Machine Learning em larga escala, otimizando o uso de recursos e reduzindo o tempo necessário para o treinamento.
