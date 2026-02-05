@@ -2,15 +2,18 @@
 # Módulo de armazenamento com S3
 
 # Criação do bucket
+
+data "aws_caller_identity" "current" {}
+
 resource "aws_s3_bucket" "create_bucket" {
 
-  bucket = var.name_bucket
+  bucket = "${var.name_bucket}-${data.aws_caller_identity.current.account_id}"
   
   force_destroy = true
 
   tags = {
     Name        = "Bucket para uso em conjunto com AWS EMR"
-    Environment = "Scripts"
+    Environment = var.project
   }
 
 }
