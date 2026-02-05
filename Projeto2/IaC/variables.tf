@@ -1,5 +1,32 @@
-# Projeto 2 - Deploy do Stack de Treinamento Distribuído de Machine Learning com PySpark no Amazon EMR
 # Script de Definição de Variáveis
+
+variable "region" {
+  type        = string
+  description = "Local de provisionamento dos serviços"
+}
+
+variable "project" {
+  type        = string
+  description = "Nome do projeto"
+}     
+
+variable "owner" {
+  type        = string
+  description = "Mantedor do projeto"
+}
+
+variable "environment" {
+  type        = string
+  description = "Tipo de ambiente"
+}
+
+variable "tags" {
+  type = string
+  description = "Etiquetas de metadados"
+}
+
+
+# Variaveis para o bucket S3
 
 variable "name_bucket" {
   type        = string
@@ -29,7 +56,40 @@ variable "files_bash" {
   default     = "./scripts"
 }
 
+
+# Variaveis para o Cluster EMR
+
 variable "name_emr" {
   type        = string
   description = "Nome do cluster EMR"
+}
+
+variable "name_ssh" {
+  type        = string
+  description = "Nome da chave de conexão ssh"
+}
+
+variable "emr_release_label" {
+  type        = string
+  description = "Versão do serviço EMR"
+}
+
+variable "applications" {
+  type        = string
+  description = "Aplicações a serem instadas no Cluster EMR"
+}
+
+variable "emr_man_instance_type" {
+  type        = string
+  description = "Tipo de instancia Master"
+}
+
+variable "emr_core_instance_type" {
+  type        = string
+  description = "Tipo de instancia worker"
+}
+
+variable "emr_core_instance_count" {
+  type        = string
+  description = "Numero de instancias workers em um nó"
 }

@@ -23,4 +23,3 @@ pip install scikit-learn
 # Cria as pastas
 mkdir $HOME/pipeline
 mkdir $HOME/logs
-
