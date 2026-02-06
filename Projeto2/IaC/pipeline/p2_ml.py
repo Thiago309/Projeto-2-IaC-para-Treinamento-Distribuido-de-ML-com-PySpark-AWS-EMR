@@ -18,11 +18,11 @@ from pyspark.ml.evaluation import *
 from pyspark.ml.evaluation import MulticlassClassificationEvaluator
 from pyspark.ml.feature import StopWordsRemover
 from pyspark.ml.tuning import CrossValidator, ParamGridBuilder
-from p2_log import dsa_grava_log
-from p2_upload_s3 import dsa_upload_modelos_ml_bucket
+from p2_log import grava_log
+from p2_upload_s3 import upload_modelos_ml_bucket
 
 # Classe para treinar e avaliar o modelo
-def DSATreinaAvaliaModelo(spark, classifier, features, classes, train, test, bucket, nome_bucket, ambiente_execucao_EMR):
+def TreinaAvaliaModelo(spark, classifier, features, classes, train, test, bucket, nome_bucket, ambiente_execucao_EMR):
 
     # Método para definir o tipo de classificador
     def FindMtype(classifier):
@@ -60,7 +60,7 @@ def DSATreinaAvaliaModelo(spark, classifier, features, classes, train, test, buc
 
         if Mtype in("LogisticRegression"):
             BestModel = fitModel.bestModel
-            dsa_grava_log( Mtype, bucket)
+            grava_log( Mtype, bucket)
             global LR_coefficients
             LR_coefficients = BestModel.coefficientMatrix.toArray()
             global LR_BestModel
@@ -79,7 +79,7 @@ def DSATreinaAvaliaModelo(spark, classifier, features, classes, train, test, buc
     accuracy = (MC_evaluator.evaluate(predictions)) * 100
     
     # Registra em log
-    dsa_grava_log( "Classificador: " + Mtype + " / Acuracia: " + str(accuracy), bucket)
+    grava_log( "Classificador: " + Mtype + " / Acuracia: " + str(accuracy), bucket)
     
     # Gera o resultado
     Mtype = [Mtype]
@@ -92,11 +92,11 @@ def DSATreinaAvaliaModelo(spark, classifier, features, classes, train, test, buc
     s3_path = 'output/' + Mtype[0] + '_' + train.name
     
     # Grava o resultado no bucket
-    dsa_upload_modelos_ml_bucket(fitModel, path , s3_path , bucket, ambiente_execucao_EMR)
+    upload_modelos_ml_bucket(fitModel, path , s3_path , bucket, ambiente_execucao_EMR)
     return result
 
 # Função para criar o modelo de Machine Learning
-def dsa_cria_modelos_ml(spark, HTFfeaturizedData, TFIDFfeaturizedData, W2VfeaturizedData, bucket, nome_bucket, ambiente_execucao_EMR):
+def cria_modelos_ml(spark, HTFfeaturizedData, TFIDFfeaturizedData, W2VfeaturizedData, bucket, nome_bucket, ambiente_execucao_EMR):
 
     # Usaremos apenas um classificador, mas é possível incluir outros
     classifiers = [LogisticRegression()] 
@@ -108,7 +108,7 @@ def dsa_cria_modelos_ml(spark, HTFfeaturizedData, TFIDFfeaturizedData, W2Vfeatur
     for featureDF in featureDF_list:
 
         # Registra em log
-        dsa_grava_log( featureDF.name + " Resultados: ", bucket)
+        grava_log( featureDF.name + " Resultados: ", bucket)
         
         # Divisão de treino e teste
         train, test = featureDF.randomSplit([0.7, 0.3],seed = 11)
@@ -135,7 +135,7 @@ def dsa_cria_modelos_ml(spark, HTFfeaturizedData, TFIDFfeaturizedData, W2Vfeatur
         for classifier in classifiers:
             
             # Cria objeto da classe
-            new_result = DSATreinaAvaliaModelo(spark,
+            new_result = TreinaAvaliaModelo(spark,
                                                classifier,
                                                features,
                                                classes,
@@ -148,7 +148,3 @@ def dsa_cria_modelos_ml(spark, HTFfeaturizedData, TFIDFfeaturizedData, W2Vfeatur
             # Gera o resultado
             results = results.union(new_result)
             results = results.where("Classifier!='Place Holder'")
-
-
-
-        

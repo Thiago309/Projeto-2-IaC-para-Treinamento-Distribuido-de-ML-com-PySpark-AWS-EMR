@@ -1,4 +1,3 @@
-# Projeto 2 - Deploy do Stack de Treinamento Distribuído de Machine Learning com PySpark no Amazon EMR
 # Geração de Log
 
 # Instala pacote Python dentro de código Python
@@ -19,7 +18,7 @@ import pendulum
 import traceback
 
 # Define a função dsa_grava_log que recebe um texto e um objeto bucket como parâmetros
-def dsa_grava_log(texto, bucket):
+def grava_log(texto, bucket):
     
     # Define o caminho para armazenar os logs como o diretório atual se "logs" for um diretório; caso contrário, usa "/home/hadoop"
     path = "." if (os.path.isdir("logs")) else "/home/hadoop"
