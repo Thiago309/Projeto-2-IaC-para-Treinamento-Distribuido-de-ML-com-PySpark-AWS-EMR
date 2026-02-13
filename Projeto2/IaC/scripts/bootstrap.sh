@@ -9,16 +9,7 @@ wget --quiet https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.
 echo -e '\nexport PATH=$HOME/conda/bin:$PATH' >> $HOME/.bashrc && source $HOME/.bashrc
 
 # Instala os pacotes via conda
-conda install -y boto3 pendulum numpy scikit-learn 
-
-# Instala os pacotes via pip 
-pip install --upgrade pip
-pip install findspark
-pip install pendulum
-pip install boto3
-pip install numpy
-pip install python-dotenv
-pip install scikit-learn
+conda install -y boto3 pendulum numpy scikit-learn findspark python-dotenv pandas
 
 # Cria as pastas
 mkdir $HOME/pipeline

@@ -4,12 +4,24 @@
 
 # No script projeto2.py adicione seu ID da AWS e suas chaves AWS onde indicado.
 
-# Crie manualmente o bucket S3 chamado: dsa-p2-terraform-<id-aws>  (substitua <id-aws> pelo seu ID da AWS)
+# Crie manualmente o bucket S3 chamado: p2-remote-state-<id-aws>  (substitua <id-aws> pelo seu ID da AWS)
 
 # Execute:
 
 terraform init
-terraform apply
+
+# Cria o Plan e salva em disco
+terraform plan -var-file terraform.tfvars -out terraform.tfplan
+
+# Executa a criação
+terraform apply terraform.tfplan
+
+# Cria o Plan para o destroy e salva em disco
+terraform plan -destroy -var-file terraform.tfvars -out terraform.tfplan
+
+# Executa o destroy
+terraform apply terraform.tfplan
+
 
 # Acompanhe a execução do pipeline pela interface da AWS como mostrado nas aulas.
 

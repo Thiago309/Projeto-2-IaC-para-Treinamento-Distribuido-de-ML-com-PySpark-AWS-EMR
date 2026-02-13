@@ -1,4 +1,4 @@
-# Script de Definição de Variáveis
+# Definição de Variáveis
 
 variable "region" {
   type        = string
@@ -19,12 +19,6 @@ variable "environment" {
   type        = string
   description = "Tipo de ambiente"
 }
-
-variable "tags" {
-  type = string
-  description = "Etiquetas de metadados"
-}
-
 
 # Variaveis para o bucket S3
 
@@ -72,11 +66,6 @@ variable "name_ssh" {
 variable "emr_release_label" {
   type        = string
   description = "Versão do serviço EMR"
-}
-
-variable "applications" {
-  type        = string
-  description = "Aplicações a serem instadas no Cluster EMR"
 }
 
 variable "emr_man_instance_type" {

@@ -1,7 +1,17 @@
 # Projeto 2 - Deploy do Stack de Treinamento Distribuído de Machine Learning com PySpark no Amazon EMR
 # Script Principal
+
 provider "aws" {
-  region = var.region
+  region  = var.region
+}
+
+# Locals
+locals {
+  tags = {
+    "owner"   = var.owner
+    "project" = var.project
+    "stage"   = var.environment
+  }
 }
 
 # Módulo de Armazenamento
@@ -22,9 +32,9 @@ module "emr" {
   name_bucket             = var.name_bucket
   project                 = var.project 
   environment             = var.environment
-  tags                    = var.tags
+  tags                    = local.tags
   emr_release_label       = var.emr_release_label
-  applications            = var.applications
+  applications            = ["Hadoop", "Spark"]
   emr_man_instance_type   = var.emr_man_instance_type
   emr_core_instance_type  = var.emr_core_instance_type
   emr_core_instance_count = var.emr_core_instance_count

@@ -1,92 +1,72 @@
-# Projeto 2 - Deploy do Stack de Treinamento Distribuído de Machine Learning com PySpark no Amazon EMR
-# Script Principal
-
-# Instala pacote Python dentro de código Python
-import subprocess
-comando = "pip install boto3"
-subprocess.run(comando.split())
-
-# Imports
-import os
+# Nome do arquivo: main.py
+import sys
 import boto3
+import datetime
 import traceback
-import pyspark 
 from pyspark.sql import SparkSession
+
+# IMPORTS CORRIGIDOS AQUI:
 from p2_log import grava_log
 from p2_processamento import limpa_transforma_dados
 from p2_ml import cria_modelos_ml
 
+def main():
+    timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    log_file = f"log_execucao_{timestamp}.txt"
+    
+    print(">>> INICIANDO ORQUESTRADOR (MAIN) <<<")
 
-print("\nLog - Inicializando o Processamento.")
+    s3_resource = boto3.resource('s3', region_name='us-east-2')
+    bucket_obj = None
+    nome_bucket = None
 
-# Cria um recurso de acesso ao S3 via código Python
-s3_client = boto3.client('s3', 
-                         aws_access_key_id=AWSACCESSKEYID,
-                         aws_secret_access_key=AWSSECRETKEY)
+    try:
+        print("Detectando bucket automaticamente...")
+        for bucket in s3_resource.buckets.all():
+            if bucket.name.startswith('bucket-ml-pipeline'): 
+                nome_bucket = bucket.name
+                break
+        
+        if not nome_bucket:
+            raise Exception("Nenhum bucket iniciado com 'bucket-ml-pipeline' encontrado.")
 
-# Lista os buckets do S3 para executar o projeto
-resposta = s3_client.list_buckets()
-for bucket in resposta['Buckets']:
-    if bucket['Name'].startswith('p2-pipeline-ML'):
-        NOME_BUCKET = bucket['Name']
-        break
+        bucket_obj = s3_resource.Bucket(nome_bucket)
+        print(f"Bucket Definido: {nome_bucket}")
 
-# Define o objeto de acesso ao bucket via Python
-bucket = s3_client.Bucket(NOME_BUCKET)
+    except Exception as e:
+        print(f"ERRO CRÍTICO NA CONFIGURAÇÃO DO BUCKET: {str(e)}")
+        sys.exit(1)
 
-# Grava o log
-grava_log("Log - Bucket Encontrado.", bucket)
+    grava_log("Inicializando Spark Session...", bucket_obj, log_file)
 
-# Grava o log
-grava_log("Log - Inicializando o Apache Spark.", bucket)
+    try:
+        spark = SparkSession.builder \
+            .appName("Projeto2_Pipeline_ML") \
+            .getOrCreate()
+        
+        spark.sparkContext.setLogLevel("ERROR")
+        
+        grava_log("Spark Inicializado com Sucesso.", bucket_obj, log_file)
 
-# Cria a Spark Session e grava o log no caso de erro
-try:
-	spark = SparkSession.builder.appName("Projeto2").getOrCreate()
-	spark.sparkContext.setLogLevel("ERROR")
-except:
-	grava_log("Log - Ocorreu uma falha na Inicialização do Spark", bucket)
-	grava_log(traceback.format_exc(), bucket)
-	raise Exception(traceback.format_exc())
+        # Chama os módulos
+        HTF, TFIDF, W2V = limpa_transforma_dados(spark, bucket_obj, nome_bucket, log_file)
+        cria_modelos_ml(spark, HTF, TFIDF, W2V, bucket_obj, nome_bucket, log_file)
 
-# Grava o log
-grava_log("Log - Spark Inicializado.", bucket)
+        grava_log("PIPELINE FINALIZADO COM SUCESSO.", bucket_obj, log_file)
 
-# Define o ambiente de execução do Amazon EMR
-ambiente_execucao_EMR = False if os.path.isdir('dados/') else True
+    except Exception as e:
+        erro_formatado = traceback.format_exc()
+        mensagem_erro = f"FALHA FATAL NO PIPELINE: {str(e)}\n{erro_formatado}"
+        grava_log(mensagem_erro, bucket_obj, log_file)
+        print(mensagem_erro)
+        
+        if 'spark' in locals():
+            spark.stop()
+        sys.exit(1)
 
-# Bloco de limpeza e transformação
-try:
-	DadosHTFfeaturized, DadosTFIDFfeaturized, DadosW2Vfeaturized = limpa_transforma_dados(spark, 
-																							  bucket, 
-																							  NOME_BUCKET, 
-																							  ambiente_execucao_EMR)
-except:
-	grava_log("Log - Ocorreu uma falha na limpeza e transformação dos dados", bucket)
-	grava_log(traceback.format_exc(), bucket)
-	spark.stop()
-	raise Exception(traceback.format_exc())
+    finally:
+        if 'spark' in locals():
+            spark.stop()
 
-# Bloco de criação dos modelos de Machine Learning
-try:
-	cria_modelos_ml (spark, 
-					     DadosHTFfeaturized, 
-					     DadosTFIDFfeaturized, 
-					     DadosW2Vfeaturized, 
-					     bucket, 
-					     NOME_BUCKET, 
-					     ambiente_execucao_EMR)
-except:
-	grava_log("Log - Ocorreu Alguma Falha ao Criar os Modelos de Machine Learning", bucket)
-	grava_log(traceback.format_exc(), bucket)
-	spark.stop()
-	raise Exception(traceback.format_exc())
-
-# Grava o log
-grava_log("Log - Modelos Criados e Salvos no S3.", bucket)
-
-# Grava o log
-grava_log("Log - Processamento Finalizado com Sucesso.", bucket)
-
-# Finaliza o Spark (encerra o cluster EMR)
-spark.stop()
+if __name__ == "__main__":
+    main()

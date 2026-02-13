@@ -17,14 +17,22 @@ variable "emr_release_label" { }
 
 variable "applications" { }
 
-variable "emr_release_label" { }
-
 variable "emr_man_instance_type" { }
 
 variable "emr_core_instance_type" { }
 
 variable "emr_core_instance_count" { }
 
+# Definição da variável 'kerberos_attributes' com valor padrão vazio
+variable "kerberos_attributes" {
+  type = set(object(
+    {
+      kdc_admin_password = string
+      realm              = string
+    }
+  ))
+  default = []
+}
 
 data "aws_caller_identity" "current" { }
 
@@ -119,6 +127,14 @@ resource "aws_emr_cluster" "emr_cluster" {
     }
   ]
 
+  dynamic "kerberos_attributes" {
+    for_each = var.kerberos_attributes
+    content {
+      realm              = kerberos_attributes.value["realm"]
+      kdc_admin_password = kerberos_attributes.value["kdc_admin_password"]
+    }
+  }
+  
   # Arquivo de configurações do Spark
   configurations_json = <<EOF
     [
@@ -134,3 +150,4 @@ resource "aws_emr_cluster" "emr_cluster" {
   ]
   EOF
 }
+
