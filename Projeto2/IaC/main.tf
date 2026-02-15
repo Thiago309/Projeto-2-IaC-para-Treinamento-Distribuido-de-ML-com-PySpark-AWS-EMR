@@ -29,7 +29,7 @@ module "s3" {
 module "emr" {
   source                  = "./modules/emr"
   name_emr                = var.name_emr
-  name_bucket             = var.name_bucket
+  name_bucket             = module.s3.final_bucket_name
   project                 = var.project 
   environment             = var.environment
   tags                    = local.tags
@@ -38,4 +38,5 @@ module "emr" {
   emr_man_instance_type   = var.emr_man_instance_type
   emr_core_instance_type  = var.emr_core_instance_type
   emr_core_instance_count = var.emr_core_instance_count
+  depends_on              = [module.s3]
 }

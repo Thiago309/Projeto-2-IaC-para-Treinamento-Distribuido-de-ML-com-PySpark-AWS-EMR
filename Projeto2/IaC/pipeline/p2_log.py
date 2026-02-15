@@ -1,4 +1,3 @@
-# Nome do arquivo: p2_jobs.py
 import os
 import datetime
 import sys

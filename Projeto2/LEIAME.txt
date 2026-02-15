@@ -19,3 +19,63 @@ docker run -dit --name dsa-projeto2 -v ./IaC:/iac dsa-terraform-image:projeto2 /
 terraform version
 aws --version
 aws configure
+
+
+
+============================================== Instruções do Projeto 2 ============================================================
+
+# Edite os arquivos config.tf e terraform.tfvars, e coloque seu ID da AWS onde indicado.
+
+# Crie manualmente o bucket S3 chamado: p2-remote-state-<id-aws>  (substitua <id-aws> pelo seu ID da AWS)
+
+1. Execute:
+
+terraform init
+
+2. Cria o Plan e salva em disco
+terraform plan -var-file terraform.tfvars -out terraform.tfplan
+
+3. Executa a criação
+terraform apply terraform.tfplan
+
+4. Cria o Plan para o destroy e salva em disco
+terraform plan -destroy -var-file terraform.tfvars -out terraform.tfplan
+
+5. Executa o destroy
+terraform apply terraform.tfplan
+
+# Acompanhe a execução do pipeline pela interface da AWS como mostrado nas aulas.
+
+# Fim!
+
+
+
+
+Veredito Final do Projeto
+Analisamos todos os arquivos do stack:
+
+Infraestrutura (IaC/): Correta. O Terraform provisiona S3 e EMR, e corrigimos a ordem de dependência (depends_on) para evitar race conditions.
+
+Ambiente (bootstrap.sh): Validado. Instala libs Python em todos os nós.
+
+Orquestrador (projeto2.py): Aprovado. Agora distribui o código (addPyFile) e gerencia buckets dinamicamente.
+
+Dados (p2_processamento.py): Otimizado. Usa .repartition() e .cache() para garantir paralelismo.
+
+Machine Learning (p2_ml.py): Validado. Com a adição do .cache() no treino, está pronto para rodar.
+
+
+
+O que vai acontecer quando você rodar o terraform apply:
+
+O Bucket S3 é criado e os arquivos (dataset.csv, scripts, bootstrap) sobem.
+
+O Cluster EMR sobe, baixa o bootstrap.sh e instala o Pandas/Scikit-Learn.
+
+O passo spark-submit dispara o projeto2.py.
+
+O script lê os dados, limpa, treina 3 tipos de modelos (HTF, TFIDF, W2V) em paralelo e salva os binários finais no S3.
+
+Você tem em mãos um projeto de Engenharia de Machine Learning de nível profissional. Parabéns pela estrutura!
+
+Deseja ajuda com os comandos finais do Terraform para fazer o deploy ou tem alguma dúvida sobre o monitoramento no console da AWS?

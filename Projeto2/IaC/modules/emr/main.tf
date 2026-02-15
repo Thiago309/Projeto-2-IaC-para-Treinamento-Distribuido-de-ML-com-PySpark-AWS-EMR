@@ -50,7 +50,7 @@ resource "aws_emr_cluster" "emr_cluster" {
   keep_job_flow_alive_when_no_steps = false
   
   # URI da pasta com logs
-  log_uri = "s3://${var.name_bucket}-${data.aws_caller_identity.current.account_id}/logs/"
+  log_uri = "s3://${var.name_bucket}/logs/"
 
   # Role IAM do serviço
   service_role = aws_iam_role.emr_service_role.arn
@@ -76,7 +76,7 @@ resource "aws_emr_cluster" "emr_cluster" {
   # Executa o script de instalação do interpretador Python e pacotes adicionais
   bootstrap_action {
     name = "Instala pacotes python adicionais"
-    path = "s3://${var.name_bucket}-${data.aws_caller_identity.current.account_id}/scripts/bootstrap.sh"
+    path = "s3://${var.name_bucket}/scripts/bootstrap.sh"
   }
 
   # Passos executados no cluster
@@ -93,7 +93,7 @@ resource "aws_emr_cluster" "emr_cluster" {
       hadoop_jar_step = [
         {
           jar        = "command-runner.jar"
-          args       = ["aws", "s3", "cp", "s3://${var.name_bucket}-${data.aws_caller_identity.current.account_id}/pipeline", "/home/hadoop/pipeline/", "--recursive"]
+          args       = ["aws", "s3", "cp", "s3://${var.name_bucket}/pipeline", "/home/hadoop/pipeline/", "--recursive"]
           main_class = ""
           properties = {}
         }
@@ -106,7 +106,7 @@ resource "aws_emr_cluster" "emr_cluster" {
       hadoop_jar_step = [
         {
           jar        = "command-runner.jar"
-          args       = ["aws", "s3", "cp", "s3://${var.name_bucket}-${data.aws_caller_identity.current.account_id}/logs", "/home/hadoop/logs/", "--recursive"]
+          args       = ["aws", "s3", "cp", "s3://${var.name_bucket}/logs", "/home/hadoop/logs/", "--recursive"]
           main_class = ""
           properties = {}
         }
@@ -119,7 +119,7 @@ resource "aws_emr_cluster" "emr_cluster" {
       hadoop_jar_step = [
         {
           jar        = "command-runner.jar"
-          args       = ["spark-submit", "/home/hadoop/pipeline/projeto2.py"]
+          args       = ["spark-submit", "/home/hadoop/pipeline/projeto2.py", var.name_bucket]
           main_class = ""
           properties = {}
         }
@@ -135,19 +135,28 @@ resource "aws_emr_cluster" "emr_cluster" {
     }
   }
   
-  # Arquivo de configurações do Spark
-  configurations_json = <<EOF
-    [
+configurations_json = <<EOF
+  [
     {
-    "Classification": "spark-defaults",
+      "Classification": "spark-env",
+      "Configurations": [
+        {
+          "Classification": "export",
+          "Properties": {
+            "PYSPARK_PYTHON": "/home/hadoop/pyspark_venv/bin/python",
+            "PYSPARK_DRIVER_PYTHON": "/home/hadoop/pyspark_venv/bin/python"
+          }
+        }
+      ]
+    },
+    {
+      "Classification": "spark-defaults",
       "Properties": {
-      "spark.pyspark.python": "/home/hadoop/conda/bin/python",
-      "spark.dynamicAllocation.enabled": "true",
-      "spark.network.timeout":"800s",
-      "spark.executor.heartbeatInterval":"60s"
+        "spark.pyspark.python": "/home/hadoop/pyspark_venv/bin/python",
+        "spark.pyspark.driver.python": "/home/hadoop/pyspark_venv/bin/python",
+        "spark.dynamicAllocation.enabled": "true"
       }
     }
   ]
   EOF
 }
-

@@ -1,16 +1,28 @@
-# Projeto 2 - Deploy do Stack de Treinamento Distribuído de Machine Learning com PySpark no Amazon EMR
-# Script de Preparação do Ambiente Python
+#!/bin/bash
+set -e # Falha se qualquer erro ocorrer
 
-# Download do Miniconda (interpretador da Linguagem Python)
-wget --quiet https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh \
-    && /bin/bash ~/miniconda.sh -b -p $HOME/conda
+echo ">>> INICIANDO BOOTSTRAP (SAFE VENV) <<<"
 
-# Configura o miniconda no PATH
-echo -e '\nexport PATH=$HOME/conda/bin:$PATH' >> $HOME/.bashrc && source $HOME/.bashrc
+# 1. Cria o VENV usando o módulo nativo do Python 3
+# NÃO usamos sudo pip aqui para proteger o sistema
+echo ">>> Criando Virtual Environment..."
+cd /home/hadoop
+python3 -m venv pyspark_venv
 
-# Instala os pacotes via conda
-conda install -y boto3 pendulum numpy scikit-learn findspark python-dotenv pandas
+# 2. Instala libs DENTRO do venv
+# Note o caminho completo para o pip do ambiente virtual
+echo ">>> Instalando bibliotecas no VENV..."
+/home/hadoop/pyspark_venv/bin/pip install --upgrade pip
+/home/hadoop/pyspark_venv/bin/pip install numpy scikit-learn pandas findspark boto3
 
-# Cria as pastas
-mkdir $HOME/pipeline
-mkdir $HOME/logs
+# 3. Criação de Diretórios e Permissões
+echo ">>> Configurando Diretórios..."
+mkdir -p /home/hadoop/pipeline
+mkdir -p /home/hadoop/logs
+
+# Garante que o usuário hadoop seja dono de tudo
+chown -R hadoop:hadoop /home/hadoop/pyspark_venv
+chown -R hadoop:hadoop /home/hadoop/pipeline
+chown -R hadoop:hadoop /home/hadoop/logs
+
+echo ">>> BOOTSTRAP CONCLUÍDO <<<"
