@@ -23,7 +23,7 @@ def limpa_transforma_dados(spark, bucket_obj, nome_bucket, log_file):
     bucket_name_clean = nome_bucket.replace("s3://", "")
     base_s3 = f"s3://{bucket_name_clean}"
     
-    grava_log("Iniciando Módulo de Processamento...", bucket_obj, log_file)
+    grava_log("Iniciando Modulo de Processamento...", bucket_obj, log_file)
 
     try:
         path_csv = f"{base_s3}/dados/dataset.csv"
@@ -65,7 +65,7 @@ def limpa_transforma_dados(spark, bucket_obj, nome_bucket, log_file):
         reviews = indexer.fit(reviews).setHandleInvalid("skip").transform(reviews)
 
     else:
-        grava_log("AVISO: Coluna 'sentiment' não encontrada. Pulando StringIndexer.", bucket_obj, log_file)
+        grava_log("AVISO: Coluna 'sentiment' nao encontrada. Pulando StringIndexer.", bucket_obj, log_file)
 
     # Limpeza com Regex (Encadeamento otimizado)
     # Remove tags HTML, caracteres especiais e espaços extras
@@ -90,19 +90,24 @@ def limpa_transforma_dados(spark, bucket_obj, nome_bucket, log_file):
    
     # Força a materialização do cache contando linhas (opcional, mas bom para debug)
     qtd_processada = feature_data.count()
-    grava_log(f"Dados prontos para vetorização. Linhas: {qtd_processada}", bucket_obj, log_file)
+    grava_log(f"Dados prontos para vetorizacao. Linhas: {qtd_processada}", bucket_obj, log_file)
 
     # 4. Feature Engineering (Pipeline Duplo: TF-IDF vs Word2Vec)
     
     # A) Pipeline TF-IDF
     hashingTF = HashingTF(inputCol="filtered", outputCol="raw_htf", numFeatures=4096)
     HTFdata = hashingTF.transform(feature_data)
-    HTFdata.name = 'HTF' # Atribuir .name ao DF não é persistente no Spark, mas funciona para passagem local
 
+    # Calcula IDF (raw_htf -> features)
     idf = IDF(inputCol="raw_htf", outputCol="features")
     idfModel = idf.fit(HTFdata)
     TFIDFdata = idfModel.transform(HTFdata)
     TFIDFdata.name = 'TFIDF'
+
+    # Prepara o dataset HTF para treino
+    # Renomeamos 'raw_htf' para 'features' para o ML entender
+    HTFdata = HTFdata.withColumnRenamed("raw_htf", "features")
+    HTFdata.name = 'HTF' # Atribuir .name ao DF não é persistente no Spark, mas funciona para passagem local
 
     # B) Pipeline Word2Vec
     # vectorSize=100 é pesado. Se o cluster for pequeno (m5.xlarge), monitore a memória.

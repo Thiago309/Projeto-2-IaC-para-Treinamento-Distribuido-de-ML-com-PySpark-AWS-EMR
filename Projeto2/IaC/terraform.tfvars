@@ -27,10 +27,10 @@ environment = "EMR"
 # Versão do EMR
 emr_release_label       = "emr-7.12.0"
 
-# Instancia Master
+# Tipo de Instancia Master (NÃO É GRATUITO)
 emr_man_instance_type   = "m5.xlarge"
 
-# Instancia dos workers
+# Tipo de Instancia dos workers (NÃO É GRATUITO)
 emr_core_instance_type  = "m5.xlarge"
 
 # Numero de workers

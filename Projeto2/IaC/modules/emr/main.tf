@@ -4,23 +4,14 @@
 
 # Variaveis EMR
 variable "name_emr" { }
-
 variable "name_bucket" { }
-
 variable "project" { }
-
 variable "environment" { }
-
 variable "tags" { }
-
 variable "emr_release_label" { }
-
 variable "applications" { }
-
 variable "emr_man_instance_type" { }
-
 variable "emr_core_instance_type" { }
-
 variable "emr_core_instance_count" { }
 
 # Definição da variável 'kerberos_attributes' com valor padrão vazio
@@ -62,12 +53,12 @@ resource "aws_emr_cluster" "emr_cluster" {
     emr_managed_slave_security_group = aws_security_group.core_security_group.id
   }
 
-  # Tipo de instância do Master (NÃO É GRATUITO)
+  # Tipo de instância do Master
   master_instance_group {
     instance_type = var.emr_man_instance_type
   }
 
-  # Tipo de instância dos workers (NÃO É GRATUITO)
+  # Tipo de instância dos workers
   core_instance_group {
     instance_type  = var.emr_core_instance_type
     instance_count = var.emr_core_instance_count
@@ -79,7 +70,7 @@ resource "aws_emr_cluster" "emr_cluster" {
     path = "s3://${var.name_bucket}/scripts/bootstrap.sh"
   }
 
-  # Passos executados no cluster
+  # [Passos executados no cluster]
 
   # 1- Copia os arquivos do S3 para as instâncias EC2 do cluster. Se falhar encerra o cluster.
   # 2- Copia os arquivos de log do S3 para as instâncias EC2 do cluster. Se falhar encerra o cluster.

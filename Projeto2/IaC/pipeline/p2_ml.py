@@ -7,7 +7,7 @@ from p2_log import grava_log, salvar_modelo_s3
 
 def treina_modelo(spark, df, bucket_obj, nome_bucket, dataset_name, log_file):
     
-    grava_log(f"--- Iniciando Treino ML para: {dataset_name} ---", bucket_obj, log_file)
+    grava_log(f">>> Iniciando Treino ML para: {dataset_name} <<<", bucket_obj, log_file)
     
     # Divide os dados
     train, test = df.randomSplit([0.7, 0.3], seed=42)
@@ -19,7 +19,7 @@ def treina_modelo(spark, df, bucket_obj, nome_bucket, dataset_name, log_file):
     
     # Força a materialização do cache e conta registros para log
     qtd_treino = train.count()
-    grava_log(f"Dataset de Treino ({dataset_name}) em cache. Registros: {qtd_treino}", bucket_obj, log_file)
+    grava_log(f"(ML) Dataset de Treino ({dataset_name}) em cache. Registros: {qtd_treino}", bucket_obj, log_file)
 
     lr = LogisticRegression(featuresCol='features', labelCol='label')
     
@@ -35,7 +35,7 @@ def treina_modelo(spark, df, bucket_obj, nome_bucket, dataset_name, log_file):
                               numFolds=2) # Mantive 2 para ser rápido no teste, produção use 3-5
 
     # O Treinamento pesado acontece aqui
-    print(f"Treinando CrossValidator para {dataset_name}...")
+    grava_log(f"Treinando CrossValidator para {dataset_name}...")
     cv_model = crossval.fit(train)
     
     # Libera memória do cluster assim que o treino acabar
@@ -43,14 +43,14 @@ def treina_modelo(spark, df, bucket_obj, nome_bucket, dataset_name, log_file):
     
     best_model = cv_model.bestModel
     # Opcional: Logar os melhores parâmetros
-    print(f"Melhor RegParam para {dataset_name}: {best_model.getRegParam()}")
+    grava_log(f"Melhor RegParam para {dataset_name}: {best_model.getRegParam()}")
 
     # Avaliação
     predictions = cv_model.transform(test)
     evaluator = MulticlassClassificationEvaluator(metricName="accuracy")
     accuracy = evaluator.evaluate(predictions) * 100
     
-    grava_log(f"Modelo ({dataset_name}) - Acurácia Final: {accuracy:.2f}%", bucket_obj, log_file)
+    grava_log(f"Modelo ({dataset_name}) - Acuracia Final: {accuracy:.2f}%", bucket_obj, log_file)
     
     # Salvamento do Modelo
     # Garante que não duplique 's3://' caso nome_bucket venha sujo
@@ -69,6 +69,7 @@ def cria_modelos_ml(spark, HTFdata, TFIDFdata, W2Vdata, bucket_obj, nome_bucket,
         
         try:
             treina_modelo(spark, data, bucket_obj, nome_bucket, nome_ds, log_file)
+            
         except Exception as e:
             import traceback
             erro_msg = f"ERRO ML ({nome_ds}): {str(e)}\n{traceback.format_exc()}"

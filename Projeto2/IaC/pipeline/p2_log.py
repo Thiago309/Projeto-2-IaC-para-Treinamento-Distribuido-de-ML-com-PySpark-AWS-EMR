@@ -1,10 +1,10 @@
 import os
 import datetime
-import sys
+
 
 def grava_log(texto, bucket_obj, nome_arquivo_log):
     """
-    Grava log no console (para o CloudWatch) e tenta salvar no S3.
+    Grava log no console (para o CloudWatch) salva no S3.
     """
     # Define diretório temporário local (seguro em qualquer nó worker)
     import tempfile
@@ -36,12 +36,12 @@ def salvar_dataframe_s3(df, full_s3_path):
     """
     Salva DataFrame Spark direto no S3 em formato Parquet.
     """
-    print(f"--- Salvando dados em: {full_s3_path}")
+    print(f"--- LOG: Salvando dados em formato Parquet em: {full_s3_path}")
     df.write.mode("overwrite").partitionBy("label").parquet(full_s3_path)
 
 def salvar_modelo_s3(model, full_s3_path):
     """
     Salva Modelo ML direto no S3.
     """
-    print(f"--- Salvando modelo em: {full_s3_path}")
+    print(f"--- LOG: Salvando modelo de ML em: {full_s3_path}")
     model.write().overwrite().save(full_s3_path)

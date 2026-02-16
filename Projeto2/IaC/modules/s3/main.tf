@@ -1,15 +1,10 @@
 # Módulo de armazenamento com bucket S3
 
 variable "project" {}
-
 variable "versioning_bucket" {}
-
 variable "name_bucket" {}
-
 variable "files_bucket" {}
-
 variable "files_data" {}
-
 variable "files_bash" {}
 
 # Obtém informações da conta atual automaticamente

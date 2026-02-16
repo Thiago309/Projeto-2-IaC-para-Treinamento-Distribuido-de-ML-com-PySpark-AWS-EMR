@@ -1,5 +1,6 @@
 # Grupos de Segurança
 
+
 # Definição do recurso de grupo de segurança para o nó principal do EMR
 resource "aws_security_group" "main_security_group" {
   

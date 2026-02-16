@@ -3,6 +3,7 @@ import os
 import boto3
 import datetime
 import traceback
+
 from pyspark.sql import SparkSession
 
 # Imports dos módulos:
@@ -18,9 +19,9 @@ def main():
     print(">>> INICIANDO ORQUESTRADOR (MAIN) <<<")
     
     # Debug: Imprime qual Python está rodando e onde ele está procurando libs
-    print(f"--- DEBUG PYTHON EXECUTABLE: {sys.executable}")
-    print(f"--- DEBUG SYSPATH: {sys.path}")
-    print(f"--- DEBUG ENV PYSPARK_PYTHON: {os.environ.get('PYSPARK_PYTHON', 'Não definido')}")
+    print(f"--- DEBUG: PYTHON EXECUTABLE: {sys.executable}")
+    print(f"--- DEBUG: SYSPATH: {sys.path}")
+    print(f"--- DEBUG: ENV PYSPARK_PYTHON: {os.environ.get('PYSPARK_PYTHON', 'Não definido')}")
 
     nome_bucket = None
 
@@ -28,11 +29,11 @@ def main():
     if len(sys.argv) > 1:
         nome_bucket = sys.argv[1]
 
-        print(f"Nome do bucket recebido via argumento: {nome_bucket}")
+        print(f"--- DEBUG: Nome do bucket recebido via argumento: {nome_bucket}")
 
     # 2. Fallback: Se não vier argumento, tenta a lógica antiga de descoberta
     else:
-        print("Aviso: Nenhum argumento recebido. Tentando descoberta automática...")
+        print("--- DEBUG: Aviso! Nenhum argumento recebido. Tentando descoberta automática...")
 
         s3_resource_temp = boto3.resource('s3') # Recurso temporário apenas para busca
         
@@ -44,11 +45,10 @@ def main():
 
     # 3. Validação Final
     if not nome_bucket:
-        print("ERRO CRÍTICO: Nome do bucket não definido nem via argumento nem via busca.")
+        print("--- DEBUG: ERRO CRÍTICO! Nome do bucket não definido nem via argumento nem via busca.")
         sys.exit(1)
 
-    # 4. Agora sim, instanciamos o recurso e o objeto do bucket
-
+    # 4. Instanciando o recurso e o objeto do bucket
     bucket_obj = None # Inicializa variável
 
     try:
@@ -56,11 +56,11 @@ def main():
         s3_resource = boto3.resource('s3') 
         bucket_obj = s3_resource.Bucket(nome_bucket)
 
-        print(f"Objeto Bucket instanciado: {bucket_obj.name}")
-        grava_log(f"Início da execução. Bucket: {nome_bucket}", bucket_obj, log_file)
+        print(f"--- DEBUG: >>> Objeto Bucket instanciado: {bucket_obj.name} <<<")
+        grava_log(f"Inicio da execucao no Bucket: {nome_bucket}", bucket_obj, log_file)
 
     except Exception as e:
-        print(f"Erro ao instanciar objeto S3: {str(e)}")
+        print(f"--- DEBUG: Erro ao instanciar objeto S3: {str(e)}")
         sys.exit(1)
 
     try:
