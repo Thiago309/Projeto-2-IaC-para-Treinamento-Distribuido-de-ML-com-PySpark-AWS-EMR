@@ -36,6 +36,9 @@ emr_core_instance_type  = "m5.xlarge"
 # Numero de workers
 emr_core_instance_count = "2"
 
+# Lista de aplicações a serem instaladas no cluster
+applications = ["Hadoop", "Spark"]
+
 # 2.Bucket S3
 
 # Nome do bucket para o pipeline

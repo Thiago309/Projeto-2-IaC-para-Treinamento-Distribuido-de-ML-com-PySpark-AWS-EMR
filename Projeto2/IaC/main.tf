@@ -34,7 +34,7 @@ module "emr" {
   environment             = var.environment
   tags                    = local.tags
   emr_release_label       = var.emr_release_label
-  applications            = ["Hadoop", "Spark"]
+  applications            = var.applications
   emr_man_instance_type   = var.emr_man_instance_type
   emr_core_instance_type  = var.emr_core_instance_type
   emr_core_instance_count = var.emr_core_instance_count

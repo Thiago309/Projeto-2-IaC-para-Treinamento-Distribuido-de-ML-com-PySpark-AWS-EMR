@@ -123,9 +123,9 @@ def limpa_transforma_dados(spark, bucket_obj, nome_bucket, log_file):
     grava_log("Salvando dados transformados no S3 (formato Parquet)...", bucket_obj, log_file)
     
     # Dica: Certifique-se que salvar_dataframe_s3 usa mode("overwrite") e format("parquet")
-    salvar_dataframe_s3(HTFdata, f"{base_s3}/dados/processados/HTF")
-    salvar_dataframe_s3(TFIDFdata, f"{base_s3}/dados/processados/TFIDF")
-    salvar_dataframe_s3(W2Vdata, f"{base_s3}/dados/processados/W2V")
+    salvar_dataframe_s3(HTFdata, f"{base_s3}/dados_processados/HTF")
+    salvar_dataframe_s3(TFIDFdata, f"{base_s3}/dados_processados/TFIDF")
+    salvar_dataframe_s3(W2Vdata, f"{base_s3}/dados_processados/W2V")
 
     # Limpeza de memória
     reviews.unpersist() # Libera o cache do CSV original

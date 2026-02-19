@@ -35,7 +35,7 @@ def treina_modelo(spark, df, bucket_obj, nome_bucket, dataset_name, log_file):
                               numFolds=2) # Mantive 2 para ser rápido no teste, produção use 3-5
 
     # O Treinamento pesado acontece aqui
-    grava_log(f"Treinando CrossValidator para {dataset_name}...")
+    grava_log(f"Treinando CrossValidator para {dataset_name}...", bucket_obj, log_file)
     cv_model = crossval.fit(train)
     
     # Libera memória do cluster assim que o treino acabar
@@ -43,7 +43,7 @@ def treina_modelo(spark, df, bucket_obj, nome_bucket, dataset_name, log_file):
     
     best_model = cv_model.bestModel
     # Opcional: Logar os melhores parâmetros
-    grava_log(f"Melhor RegParam para {dataset_name}: {best_model.getRegParam()}")
+    grava_log(f"Melhor RegParam para {dataset_name}: {best_model.getRegParam()}", bucket_obj, log_file)
 
     # Avaliação
     predictions = cv_model.transform(test)
@@ -55,7 +55,7 @@ def treina_modelo(spark, df, bucket_obj, nome_bucket, dataset_name, log_file):
     # Salvamento do Modelo
     # Garante que não duplique 's3://' caso nome_bucket venha sujo
     bucket_clean = nome_bucket.replace("s3://", "")
-    caminho_modelo = f"s3://{bucket_clean}/output/modelos/LR_{dataset_name}"
+    caminho_modelo = f"s3://{bucket_clean}/output_jobs/modelos/LR_{dataset_name}"
     
     salvar_modelo_s3(best_model, caminho_modelo)
 

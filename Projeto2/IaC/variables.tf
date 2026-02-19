@@ -82,3 +82,8 @@ variable "emr_core_instance_count" {
   type        = string
   description = "Numero de instancias workers em um nó"
 }
+
+variable "applications" {
+  type = list(string)
+  description = "Lista de aplicações para instalar no EMR"
+}

@@ -70,7 +70,7 @@ resource "aws_s3_object" "bash_scripts" {
 # cria uma pasta chamada dados-transformados dentro do bucket s3
 resource "aws_s3_object" "transformed_data" {
   bucket = aws_s3_bucket.create_bucket.id
-  key    = "dados_transformados/"
+  key    = "dados_processados/"
 }
 
 # cria uma pasta chamada logs
