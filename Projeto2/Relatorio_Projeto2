@@ -1,0 +1,71 @@
+Relatório de Implementação: Pipeline Data Lakehouse & ML no AWS EMR
+
+Projeto: Provisionamento de Data Lake e Cluster EMR via Terraform para processamento distribuído (Spark) e treinamento de modelos de NLP.
+
+Status Atual: ✅ Infraestrutura Estável | ✅ Pipeline Funcional | ⚠️ ML em Execução (Aguardando correção final de log)
+
+1. Infraestrutura como Código (Terraform)
+O código Terraform foi refatorado para seguir boas práticas de modularização e resolver conflitos de dependência.
+
+Correções e Melhorias
+Ciclo de Dependência (Circular Dependency):
+
+Problema: O módulo S3 dependia do EMR e vice-versa, ou o S3 tentava usar seu próprio nome antes de ser criado.
+
+Solução: Isolamos a criação do bucket. O módulo S3 agora exporta o nome final (final_bucket_name) via outputs.tf, que é injetado no módulo EMR.
+
+Duplicação de Nomes de Bucket:
+
+Problema: O script concatenava o ID da conta AWS duas vezes (bucket-12345-12345), causando erro NoSuchBucket no bootstrap.
+
+Solução: Limpeza no main.tf do EMR para usar a variável var.name_bucket exatamente como ela vem do módulo S3.
+
+Variáveis Dinâmicas:
+
+Melhoria: Substituímos a lista de aplicações hardcoded por uma variável var.applications (["Hadoop", "Spark"]) definida no terraform.tfvars.
+
+2. Configuração de Ambiente (Bootstrap & Dependências)
+Esta foi a etapa mais crítica. Enfrentamos o "Inferno de Dependências" entre o Sistema Operacional, a AWS CLI e o Python do Spark.
+
+A Solução Definitiva: Virtual Environment (venv)
+Tentativa 1 (Conda): Falhou devido a conflitos de PATH e permissões de usuário (root vs hadoop).
+
+Tentativa 2 (System Pip): Quebrou a AWS CLI (erro No module named 'dateutil') ao atualizar bibliotecas globais do Linux.
+
+Solução Final (Aprovada):
+
+Criamos um Ambiente Virtual Isolado em /home/hadoop/pyspark_venv.
+
+Instalamos pandas, numpy, scikit-learn apenas dentro desse ambiente.
+
+Configuramos o Spark (via spark-env no Terraform) para usar as variáveis PYSPARK_PYTHON apontando para esse ambiente, sem tocar no Python do sistema.
+
+Pipeline de Processamento (p2_processamento.py)
+O script ETL foi otimizado para performance e corrigido para compatibilidade com a etapa de ML.
+
+Otimizações de Performance
+Reparticionamento: Adicionado reviews.repartition(20) logo após a leitura do CSV. Isso força o Spark a distribuir os dados entre todos os nós do cluster, evitando que apenas uma máquina trabalhe.
+
+Caching Estratégico: Adicionado .cache() após a tokenização e limpeza.
+
+Motivo: O Spark usa "Lazy Evaluation". Sem o cache, ele reprocessaria o texto (Regex, StopWords) três vezes (uma para HTF, uma para TF-IDF, uma para W2V). Agora ele processa uma vez e reutiliza.
+
+Correção de Bug Lógico (HTF)
+Erro: O modelo HashingTF gerava uma coluna chamada raw_htf, mas o algoritmo de ML esperava a coluna features.
+
+Correção: Adicionada a renomeação explícita: .withColumnRenamed("raw_htf", "features").
+
+4. Pipeline de Machine Learning (p2_ml.py)
+O script responsável por treinar e validar os modelos.
+
+Otimizações
+Cache no Treino: Adicionado train.cache() antes do CrossValidator.
+
+Impacto: Algoritmos iterativos como Regressão Logística acessam os dados dezenas de vezes. O cache evita recalcular a vetorização a cada iteração, acelerando drasticamente o treino.
+
+Correção de Sintaxe (Atual)
+Erro: TypeError: grava_log() missing 2 required positional arguments.
+
+Causa: A função de log esperava 3 argumentos, mas em alguns pontos do código (dentro do loop de treino) passamos apenas a mensagem de texto.
+
+Status: Código corrigido fornecido. Necessário atualizar o arquivo e rodar novamente.
