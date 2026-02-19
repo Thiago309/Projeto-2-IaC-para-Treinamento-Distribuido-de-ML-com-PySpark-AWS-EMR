@@ -10,7 +10,7 @@ variable "environment" { }
 variable "tags" { }
 variable "emr_release_label" { }
 variable "applications" { }
-variable "emr_man_instance_type" { }
+variable "emr_main_instance_type" { }
 variable "emr_core_instance_type" { }
 variable "emr_core_instance_count" { }
 
@@ -55,7 +55,7 @@ resource "aws_emr_cluster" "emr_cluster" {
 
   # Tipo de instância do Master
   master_instance_group {
-    instance_type = var.emr_man_instance_type
+    instance_type = var.emr_main_instance_type
   }
 
   # Tipo de instância dos workers

@@ -68,7 +68,7 @@ variable "emr_release_label" {
   description = "Versão do serviço EMR"
 }
 
-variable "emr_man_instance_type" {
+variable "emr_main_instance_type" {
   type        = string
   description = "Tipo de instancia Master"
 }
