@@ -38,4 +38,7 @@ Projeto2/
 ---
 ## ☁️ Diagrama de Arquitetura do Projeto
 ![Diagrama](./Projeto2/assets/arquitetura.gif)
+
 ---
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/thiagoviniciusbsantos/)
