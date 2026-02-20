@@ -35,19 +35,16 @@ variable "versioning_bucket" {
 variable "files_bucket" {
   type        = string
   description = "Pasta de onde os scripts python serão obtidos para o processamento"
-  default     = "./pipeline"
 }
 
 variable "files_data" {
   type        = string
   description = "Pasta de onde os dados serão obtidos"
-  default     = "./dados"
 }
 
 variable "files_bash" {
   type        = string
   description = "Pasta de onde os scripts bash serão obtidos"
-  default     = "./scripts"
 }
 
 
@@ -56,11 +53,6 @@ variable "files_bash" {
 variable "name_emr" {
   type        = string
   description = "Nome do cluster EMR"
-}
-
-variable "name_ssh" {
-  type        = string
-  description = "Nome da chave de conexão ssh"
 }
 
 variable "emr_release_label" {
