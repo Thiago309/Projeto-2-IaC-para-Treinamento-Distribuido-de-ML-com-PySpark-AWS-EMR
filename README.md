@@ -5,6 +5,8 @@
 ![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
 ![AWS](https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white)
 ![Machine Learning](https://img.shields.io/badge/Machine%20Learning-F37626?style=for-the-badge&logo=scikit-learn&logoColor=white)
+![Data/Ops](https://img.shields.io/badge/Data%2FOps-005C84?style=for-the-badge)
+![Engenharia de Dados](https://img.shields.io/badge/Engenharia%20de%20Dados-orange?style=for-the-badge)
 
 > **Resumo:** Este projeto implementa um pipeline completo de Machine Learning e Engenharia de Dados (Data Lakehouse) utilizando processamento distribuído na nuvem. Toda a infraestrutura é provisionada de forma 100% automatizada utilizando Terraform (IaC), orquestrando um cluster Amazon EMR e buckets Amazon S3 para treinar modelos de Processamento de Linguagem Natural (NLP) com PySpark.
 
