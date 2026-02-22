@@ -35,7 +35,7 @@ module "emr" {
   tags                    = local.tags
   emr_release_label       = var.emr_release_label
   applications            = var.applications
-  emr_main_instance_type   = var.emr_main_instance_type
+  emr_main_instance_type  = var.emr_main_instance_type
   emr_core_instance_type  = var.emr_core_instance_type
   emr_core_instance_count = var.emr_core_instance_count
   depends_on              = [module.s3]

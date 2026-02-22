@@ -25,7 +25,7 @@ environment = "EMR"
 emr_release_label       = "emr-7.12.0"
 
 # Tipo de Instancia Master (NÃO É GRATUITO)
-emr_main_instance_type   = "m5.xlarge"
+emr_main_instance_type  = "m5.xlarge"
 
 # Tipo de Instancia dos workers (NÃO É GRATUITO)
 emr_core_instance_type  = "m5.xlarge"
@@ -34,7 +34,7 @@ emr_core_instance_type  = "m5.xlarge"
 emr_core_instance_count = "2"
 
 # Lista de aplicações a serem instaladas no cluster
-applications = ["Hadoop", "Spark"]
+applications            = ["Hadoop", "Spark"]
 
 
 # 2.Bucket S3
